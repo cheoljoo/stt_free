@@ -10,21 +10,26 @@
 
 ## 사용법
 
+의존성 관리는 [uv](https://docs.astral.sh/uv/)를 사용한다.
+
 ```bash
-pip install -r requirements.txt
-playwright install --with-deps chromium   # PNG 렌더링용 (선택)
+uv sync
+uv run playwright install chromium   # PNG 렌더링용 (선택)
 
 # inbox/ 에 음성 파일(.m4a, .mp3, .wav 등)을 넣고 실행
-python pipeline/run.py
+uv run python pipeline/run.py
 
 # 특정 파일 하나만 처리
-python pipeline/run.py --file inbox/2026-07-19_1030_call_홍길동.m4a
+uv run python pipeline/run.py --file inbox/2026-07-19_1030_call_홍길동.m4a
 
 # AI 분석 없이 STT만 테스트
-python pipeline/run.py --skip-llm
+uv run python pipeline/run.py --skip-llm
 ```
 
 처리 결과는 `transcripts/`(전문), `summaries/`(요약), `onepagers/`(1페이지 HTML/PNG)에 생성되고,
 원본 음성은 `archive/{연}/{월}/`로 이동한다. 설정은 [pipeline/config.yaml](pipeline/config.yaml).
+
+`analyze.backend`를 `claude`/`gemini`/`ollama`로 쓰려면 해당 extra를 함께 설치한다.
+예: `uv sync --extra claude`
 
 라이선스: [Apache License 2.0](LICENSE)

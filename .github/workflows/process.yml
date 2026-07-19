@@ -19,25 +19,26 @@ jobs:
         with:
           lfs: true
 
-      - uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
         with:
           python-version: "3.12"
 
       - name: Install ffmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
-      - name: Install Python dependencies
-        run: pip install -r requirements.txt anthropic
+      - name: Sync dependencies
+        run: uv sync --extra claude
 
       - name: Install Playwright browser
-        run: playwright install --with-deps chromium
+        run: uv run playwright install --with-deps chromium
 
       - name: Run pipeline
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           # Actions 러너에는 claude CLI가 없으므로 API 백엔드로 오버라이드
           STT_FREE_ANALYZE_BACKEND: claude
-        run: python pipeline/run.py
+        run: uv run python pipeline/run.py
 
       - name: Commit results
         run: |
