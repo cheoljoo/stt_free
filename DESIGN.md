@@ -155,13 +155,15 @@ LLM 백엔드는 config에서 선택:
 
 | | A. GitHub Actions (기본) | B. 로컬 PC |
 |---|---|---|
-| 트리거 | `inbox/**` push 시 자동 | cron 또는 수동 `python pipeline/run.py` |
+| 트리거 | `inbox/**` push 시 자동 | cron 또는 수동 `uv run python pipeline/run.py` |
 | 비용 | 무료 티어 (private repo 월 2,000분) | 전기세 |
 | STT 속도 | CPU라 느림 (10분 녹음 ≈ 수 분) | GPU면 빠름 |
-| LLM | API 키 필요 (Secrets) | `claude -p` / ollama 가능 |
-| 장점 | PC 안 켜도 됨. 완전 자동 | 무료·고품질·프라이버시 |
+| LLM | `gemini` 무료 티어 (API 키만 필요, 과금 없음) | `claude-code`(`claude -p`, Claude Code 구독 내 무료) 권장 |
+| 장점 | PC 안 켜도 됨. 완전 자동, $0 | 무료·Claude Code 품질·프라이버시 |
 
-둘 다 같은 `pipeline/run.py` 를 실행하므로 언제든 전환 가능.
+둘 다 같은 `pipeline/run.py` 를 실행하므로 언제든 전환 가능. **API 과금을 원치 않으므로
+`claude`(유료 API) 백엔드는 기본적으로 사용하지 않는다** — 로컬은 `claude-code`(Claude Code 구독),
+Actions는 `gemini`(무료 티어)로 분리해 어느 경로로 처리해도 추가 비용이 들지 않게 한다.
 **민감한 통화 녹음이 많다면 B(로컬) 모드를 권장** — 음성이 외부 러너에 올라가지 않음.
 
 ---

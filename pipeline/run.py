@@ -104,6 +104,8 @@ def process_one(audio_path: Path, cfg: dict, skip_llm: bool = False) -> None:
             analyze_cfg["backend"] = "none"
         elif os.environ.get("STT_FREE_ANALYZE_BACKEND"):
             analyze_cfg["backend"] = os.environ["STT_FREE_ANALYZE_BACKEND"]
+            if os.environ.get("STT_FREE_ANALYZE_MODEL"):
+                analyze_cfg["model"] = os.environ["STT_FREE_ANALYZE_MODEL"]
         analysis = analyze_mod.analyze(result.full_text, analyze_cfg)
         title = analysis.get("title") or stem
         outs["summary"].write_text(
