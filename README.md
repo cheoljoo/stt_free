@@ -2,7 +2,12 @@
 
 https://www.youtube.com/watch?v=9m8iMzEBuSU : 5인 회사 운영하며 직접 헤르메스 에이전트 720시간 돌려본 후기 (feat. Slack, Hostinger)
 의 내용을 보고 얻은 아이디어 입니다.
+https://www.youtube.com/watch?v=j5CIK1pcf3A : 헤르메스 에이전트 처음 써보는 분도 이 영상 하나로 끝납니다, 설치부터 회사 운영 자동화까지
 - data centric으로 slack , teams 등 모든 내용을 모으는 작업이 필요 : 메신저 , 이메일 , 노션 ... 그리고, 전화 통화 , 회의 음성  : 무엇보다 사용자들이 매우 쉽게 사용하게 하려면 어떤 것을 더 추가해야 할까요?
+- gstack , gbrain : 회사 운영 잘 하는가 YCombinator / 사업 방향성
+- Hermes에서 매일 SOP(우리 조직의 뇌) wiki : LLM wiki   -> 해당 회사에서 하는 일을 모아서 매일 무슨 일이 일어나는지 받아볼수 있음
+- hermes : 자동화 아이템을 더 뽑아줘
+
 
 기본 아이디어:
 - 나는 android 폰을 사용한다.
