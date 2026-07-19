@@ -42,6 +42,14 @@ uv run python pipeline/run.py --skip-llm
 `analyze.backend`를 `claude`/`gemini`/`ollama`로 쓰려면 해당 extra를 함께 설치한다.
 예: `uv sync --extra claude`
 
+## 폰에서 음성 업로드하기
+
+Android 폰에서 `inbox/`로 음성 파일을 자동 push하는 방법은 두 가지 중 편한 쪽을 선택한다
+(둘 다 같은 파일명 규칙을 쓰고, 이후 파이프라인은 동일하게 동작):
+
+- **네이티브 앱** ([android/](android/)) — 설치 후 저장소 URL과 GitHub PAT만 입력하면 끝. UI에서 동기화 상태 확인 가능.
+- **Termux 스크립트** ([phone/auto_push.sh](phone/auto_push.sh)) — 이미 Termux/셸에 익숙하다면 더 가볍게 커스터마이즈 가능.
+
 ## 비용 ($0 정책)
 
 API 과금 없이 돌아가도록 기본값을 구성했다.

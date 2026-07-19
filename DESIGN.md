@@ -15,10 +15,12 @@ flowchart LR
     subgraph Phone["📱 Android 폰"]
         A1[음성 녹음 앱] --> B[녹음 폴더]
         A2[통화 녹음] --> B
-        B --> C[Termux 자동 스크립트<br/>git add / commit / push]
+        B --> C1[방법 A: Termux 스크립트<br/>git add / commit / push]
+        B --> C2[방법 B: stt_free 네이티브 앱<br/>JGit add / commit / push]
     end
 
-    C -->|push| D[(GitHub 저장소<br/>stt_free)]
+    C1 -->|push| D[(GitHub 저장소<br/>stt_free)]
+    C2 -->|push| D
 
     subgraph Pipeline["⚙️ 처리 파이프라인 (GitHub Actions 또는 로컬 PC)"]
         D -->|inbox/ 에 새 파일 감지| E[1. STT<br/>faster-whisper]
@@ -59,8 +61,10 @@ stt_free/
 │   ├── analyze.py          # LLM 요약/분석
 │   ├── onepager.py         # HTML 템플릿 렌더링 + PNG 변환
 │   └── config.yaml         # 모델, 언어, LLM 백엔드 선택 등
-├── phone/                  # 폰(Termux) 쪽 스크립트
+├── phone/                  # 폰 쪽 수집 스크립트 (방법 A: Termux)
 │   └── auto_push.sh
+├── android/                # 폰 쪽 수집 앱 (방법 B: 네이티브 앱, Kotlin)
+│   └── app/...
 ├── .github/workflows/
 │   └── process.yml         # inbox 변경 시 자동 실행
 └── DESIGN.md
@@ -92,14 +96,38 @@ stt_free/
 
 ## 3. 컴포넌트별 설계
 
-### 3-1. 폰 (수집 & 업로드) — Termux
+### 3-1. 폰 (수집 & 업로드) — 두 가지 방법 중 선택
+
+같은 역할(새 음성 파일 탐지 → 파일명 규칙 적용 → `inbox/`에 git add/commit/push)을
+Termux 스크립트 또는 네이티브 앱 중 편한 쪽으로 수행하면 된다. 이후 파이프라인(GitHub Actions/로컬 PC)은
+어느 쪽으로 push됐든 동일하게 동작한다.
+
+#### 방법 A — Termux (`phone/auto_push.sh`)
 
 - **Termux + termux-job-scheduler**(또는 Tasker 연동)로 주기 실행
-- `phone/auto_push.sh` 동작:
+- 동작:
   1. 녹음 앱 폴더(예: `/sdcard/Recordings`, 통화녹음 폴더)에서 새 파일 탐지
   2. 파일명 규칙으로 rename 후 저장소의 `inbox/` 로 복사
   3. `git add → commit → push` (SSH deploy key 사용)
-- 대안: Termux가 번거로우면 **FolderSync/Syncthing 으로 PC에 동기화 → PC가 commit** 하는 우회 경로도 가능 (파이프라인은 동일)
+- 장점: 이미 있는 git/셸 지식 그대로 재사용, 커스터마이즈 쉬움
+- 단점: Termux 설치·설정(SSH 키, storage 권한, job scheduler)이 번거롭고 UI가 없어 상태 확인이 불편함
+- 대안: Termux가 번거로우면 **FolderSync/Syncthing 으로 PC에 동기화 → PC가 commit** 하는 우회 경로도 가능
+
+#### 방법 B — 네이티브 Android 앱 (`android/`)
+
+- Kotlin으로 작성한 일반 Android 앱. **JGit**(순수 Java/Kotlin git 구현체)을 앱에 내장해
+  외부 프로세스 없이 앱 프로세스 안에서 직접 add/commit/push 수행
+- 동작:
+  1. `MediaStore` API로 녹음 폴더(음성 메모/통화 녹음)를 스캔해 새 파일 탐지 (Termux처럼 파일 경로 하드코딩 대신
+     `MediaStore.Audio` 쿼리를 사용해 기기별 폴더 차이에 덜 민감하게 처리)
+  2. 파일명 규칙(§ 파일명 규칙 절, `auto_push.sh`와 동일 규칙)으로 rename 후 앱 내부 clone(`inbox/`)에 복사
+  3. JGit으로 `add → commit → push` (HTTPS + PAT, 또는 SSH 키 — 설정 화면에서 선택)
+  4. `WorkManager`로 주기 실행(기본 15~30분 간격) + "지금 바로 동기화" 수동 트리거 버튼 제공
+- 장점: 설치 후 앱 UI에서 저장소 URL/인증정보만 입력하면 끝. 동기화 상태·마지막 push 결과를 화면에서 바로 확인 가능,
+  Termux 대비 배터리 최적화 예외 설정이 더 직관적(Android 표준 알림/권한 플로우)
+- 단점: Termux보다 앱 용량이 크고(JGit 포함), 최초 clone 시 저장소 전체를 폰에 내려받아야 함
+- 인증: 저장소는 private이므로 GitHub **Personal Access Token(PAT, repo 권한만)** 을 앱 설정 화면에 입력받아
+  Android Keystore로 암호화 저장. SSH 키 방식은 JGit의 SSH 세션 팩토리 설정이 더 복잡해 1차 구현에서는 PAT+HTTPS만 지원
 
 ### 3-2. 저장소 (GitHub)
 
@@ -197,7 +225,8 @@ sequenceDiagram
 2. **Phase 2 — 자동화**
    GitHub Actions 워크플로 + LFS 설정, inbox push → 결과 commit 자동화
 3. **Phase 3 — 폰 연동**
-   Termux `auto_push.sh` + 주기 실행 설정
+   Termux `auto_push.sh` + 주기 실행 설정, 그리고 이를 대체 가능한 네이티브 Android 앱(`android/`,
+   JGit 기반) 구현 — 둘 중 사용자가 편한 방법을 선택해서 사용
 4. **Phase 4 — 개선**
    화자 분리(pyannote), 다건 일괄 처리 리포트, 월간 인덱스 페이지 등
 

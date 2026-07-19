@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">stt_free Collector</string>
+    <string name="settings_title">저장소 설정</string>
+
+    <string name="label_repo_url">Git 저장소 URL (예: https://github.com/user/stt_free.git)</string>
+    <string name="label_git_username">GitHub 사용자명</string>
+    <string name="label_pat">Personal Access Token (repo 권한)</string>
+    <string name="btn_save_settings">저장</string>
+    <string name="btn_sync_now">지금 동기화</string>
+    <string name="status_idle">대기 중</string>
+    <string name="status_syncing">동기화 중…</string>
+    <string name="status_success">마지막 동기화 성공: %1$s (파일 %2$d개 push)</string>
+    <string name="status_error">동기화 실패: %1$s</string>
+    <string name="status_not_configured">설정 화면에서 저장소 정보를 먼저 입력하세요.</string>
+    <string name="notification_channel_name">stt_free 동기화</string>
+</resources>
