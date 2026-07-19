@@ -1,0 +1,28 @@
+# stt_free 파이프라인 설정
+# DESIGN.md 3-3, 3-4 참고
+
+paths:
+  inbox: inbox
+  archive: archive
+  transcripts: transcripts
+  summaries: summaries
+  onepagers: onepagers
+
+stt:
+  backend: faster-whisper
+  # tiny/base/small/medium/large-v3. GitHub Actions(CPU)는 small~medium, 로컬 GPU는 large-v3 권장
+  model_size: small
+  device: cpu          # cpu | cuda
+  compute_type: int8   # cpu: int8, cuda: float16
+  language: ko
+
+analyze:
+  # claude | claude-code | gemini | ollama | none
+  backend: claude-code
+  model: claude-sonnet-5
+  # ollama 사용 시 모델명 (예: llama3.1)
+  ollama_model: llama3.1
+
+onepager:
+  render_png: true
+  # playwright 미설치 시 자동으로 HTML만 생성하고 PNG는 건너뜀

@@ -1,0 +1,52 @@
+name: Process inbox
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "inbox/**"
+  workflow_dispatch: {}
+
+concurrency:
+  group: stt-free-process
+  cancel-in-progress: false
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt anthropic
+
+      - name: Install Playwright browser
+        run: playwright install --with-deps chromium
+
+      - name: Run pipeline
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Actions 러너에는 claude CLI가 없으므로 API 백엔드로 오버라이드
+          STT_FREE_ANALYZE_BACKEND: claude
+        run: python pipeline/run.py
+
+      - name: Commit results
+        run: |
+          git config user.name "stt-free-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add transcripts/ summaries/ onepagers/ archive/ inbox/
+          if git diff --cached --quiet; then
+            echo "변경 사항 없음"
+          else
+            git commit -m "pipeline: 음성 처리 결과 자동 생성"
+            git push
+          fi
